@@ -1,20 +1,39 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title> Proyecto Biblioteca </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-item>
+    <ion-label>Título </ion-label>
+    <ion-input [(ngModel)]="tareaEditando.titulo"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label>Autor </ion-label>
+    <ion-input [(ngModel)]="tareaEditando.autor"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label>Editorial </ion-label>
+    <ion-input [(ngModel)]="tareaEditando.editorial"></ion-input>
+  </ion-item>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  <ion-button (click)="clicBotonInsertar()">Añadir libro</ion-button>
+
+  <h1>LISTA DE LIBROS</h1>
+  <ion-list>
+    <ion-item *ngFor="let documentTarea of arrayColeccionTareas">
+      <ion-grid>
+        <ion-row>
+          <h2>{{ documentTarea.data.titulo }}</h2>
+        </ion-row>
+        <ion-row>
+          <p>{{ documentTarea.data.autor }}</p>
+        </ion-row>
+        <ion-row>
+          <p>{{ documentTarea.data.editorial }}</p>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  </ion-list>
 </ion-content>
