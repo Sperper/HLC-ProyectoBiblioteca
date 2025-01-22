@@ -16,4 +16,12 @@ export class FirestoreService {
   public consultar(coleccion: any) {
     return this.angularFirestore.collection(coleccion).snapshotChanges();
   }
+
+  public borrar(coleccion : any, documentId: any) {
+    return this.angularFirestore.collection(coleccion).doc(documentId).delete();
+  }
+
+  public actualizar(coleccion: any, documentId: any, datos: any) {
+    return this.angularFirestore.collection(coleccion).doc(documentId).set(datos);
+  }
 }
