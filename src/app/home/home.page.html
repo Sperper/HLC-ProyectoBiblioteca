@@ -18,14 +18,23 @@
     <ion-input [(ngModel)]="tareaEditando.editorial"></ion-input>
   </ion-item>
 
+  
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="anadirLibroSegundaPagina()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
   <ion-button (click)="clicBotonInsertar()">Añadir libro</ion-button>
   <ion-button (click)="clickBotonBorrar()">Borrar libro</ion-button>
   <ion-button (click)="clicBotonModificar()">Modificar tarea</ion-button>
 
   <h1>LISTA DE LIBROS</h1>
   <ion-list>
-    
-    <ion-item *ngFor="let documentTarea of arrayColeccionTareas" (click)="selecLibro(documentTarea)">
+    <ion-item
+      *ngFor="let documentTarea of arrayColeccionTareas"
+      (click)="selecLibro(documentTarea)"
+    >
       <ion-grid>
         <ion-row>
           <h2>{{ documentTarea.data.titulo }}</h2>

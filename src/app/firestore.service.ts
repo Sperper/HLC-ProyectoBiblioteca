@@ -24,4 +24,8 @@ export class FirestoreService {
   public actualizar(coleccion: any, documentId: any, datos: any) {
     return this.angularFirestore.collection(coleccion).doc(documentId).set(datos);
   }
+
+  public consultarPorId(coleccion:string, documentId:string) {
+    return this.angularFirestore.collection(coleccion).doc(documentId).snapshotChanges();
+  }
 }

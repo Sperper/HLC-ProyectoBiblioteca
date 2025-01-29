@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage {
+export class HomePage {     
   tareaEditando: ProyectoBiblioteca;
   arrayColeccionTareas: any = [
     {
@@ -51,6 +51,10 @@ export class HomePage {
   }
 
   idLibroSelec: string = '';
+
+  anadirLibroSegundaPagina() {
+    this.router.navigate(['/detalle', this.idLibroSelec, 'nuevo']);
+  }
   
   selecLibro(libroSelec: any) {
     console.log('Libro seleccionado: ');
