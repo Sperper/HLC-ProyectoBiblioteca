@@ -10,7 +10,28 @@
       <ion-title size="large">detalle</ion-title>
     </ion-toolbar>
   </ion-header>
-  <p>Título: {{ document.data.titulo }}</p>
-  <p>Autor: {{ document.data.autor }}</p>
-  <p>Editorial: {{ document.data.editorial }}</p>
+  
+  <ion-list>
+    <ion-item>
+      <ion-label position="floating">Título</ion-label>
+      <ion-input [(ngModel)]="tareaEditando.titulo"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Autor</ion-label>
+      <ion-input [(ngModel)]="tareaEditando.autor"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Editorial</ion-label>
+      <ion-input [(ngModel)]="tareaEditando.editorial"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <ion-button (click)="seleccionar()">Añadir Foto</ion-button>
+  <ion-button (click)="eliminarArchivo(imagenSelec)">Eliminar Foto</ion-button>
+  <ion-button *ngIf="!isNew" (click)="clickBotonBorrar()">Borrar</ion-button>
+  <ion-button (click)="clicBotonGuardar()">{{ isNew ? 'Guardar' : 'Modificar' }}</ion-button>
+
+  <div *ngIf="imagenSelec">
+    <img [src]="imagenSelec" alt="Imagen seleccionada" />
+  </div>
 </ion-content>

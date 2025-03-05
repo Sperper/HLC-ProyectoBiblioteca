@@ -26,19 +26,20 @@ export class HomePage {
   }
 
   clicBotonInsertar() {
-    this.firestoreService.insertar('tareas', this.tareaEditando).then(() => {
+    this.firestoreService.insertar('libros-samuel', this.tareaEditando).then(() => {
       console.log('Tarea creada correctamente!');
       // Limpiar el libro que se estaba editando
       this.tareaEditando = {} as ProyectoBiblioteca;
-    }),
-      (error: any) => {
-        console.error(error);
-      };
+      // Actualizar la lista completa
+      this.obtenerListaTareas();
+    }).catch((error: any) => {
+      console.error('Error al crear la tarea: ', error);
+    });
   }
 
   obtenerListaTareas() {
     this.firestoreService
-      .consultar('tareas')
+      .consultar('libros-samuel')
       .subscribe((resultadoConsultaTareas: any) => {
         this.arrayColeccionTareas = [];
         resultadoConsultaTareas.forEach((datosTarea: any) => {
@@ -53,7 +54,7 @@ export class HomePage {
   idLibroSelec: string = '';
 
   anadirLibroSegundaPagina() {
-    this.router.navigate(['/detalle', this.idLibroSelec, 'nuevo']);
+    this.router.navigate(['/detalle', 'nuevo']);
   }
   
   selecLibro(libroSelec: any) {
@@ -67,22 +68,28 @@ export class HomePage {
   }
 
   clickBotonBorrar() {
-    this.firestoreService.borrar('tareas', this.idLibroSelec).then(() => {
+    this.firestoreService.borrar('libros-samuel', this.idLibroSelec).then(() => {
+      console.log('Tarea borrada correctamente!');
       // Actualizar la lista completa
       this.obtenerListaTareas();
       // Limpiar el libro que se estaba editando
       this.tareaEditando = {} as ProyectoBiblioteca;
+    }).catch((error: any) => {
+      console.error('Error al borrar la tarea: ', error);
     });
   }
 
   clicBotonModificar() {
     this.firestoreService
-      .actualizar('tareas', this.idLibroSelec, this.tareaEditando)
+      .actualizar('libros-samuel', this.idLibroSelec, this.tareaEditando)
       .then(() => {
+        console.log('Tarea modificada correctamente!');
         // Actualizar la lista completa
         this.obtenerListaTareas();
         // Limpiar el libro que se estaba editando
         this.tareaEditando = {} as ProyectoBiblioteca;
+      }).catch((error: any) => {
+        console.error('Error al modificar la tarea: ', error);
       });
   }
 
@@ -90,6 +97,4 @@ export class HomePage {
     id: '',
     data: {} as ProyectoBiblioteca,
   }
-
-  
 }

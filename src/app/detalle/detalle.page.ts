@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProyectoBiblioteca } from '../proyecto-biblioteca';
 import { FirestoreService } from '../firestore.service';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { ImagePicker } from '@awesome-cordova-plugins/image-picker/ngx';
 
 @Component({
   selector: 'app-detalle',
@@ -22,7 +24,12 @@ export class DetallePage implements OnInit {
     },
   ];
 
-  constructor(private activatedRoute: ActivatedRoute, private firestoreService: FirestoreService) { 
+  constructor(private activatedRoute: ActivatedRoute, 
+    private firestoreService: FirestoreService, 
+    private router: Router, private loadingController: LoadingController, 
+    private alertController: AlertController,
+    private toastController: ToastController,
+    private imagePicker: ImagePicker) { 
 
     this.obtenerListaTareas();
 
@@ -46,7 +53,6 @@ export class DetallePage implements OnInit {
   }
 
   ngOnInit() {
-
     let idRecibido = this.activatedRoute.snapshot.paramMap.get('id');
     
     if (idRecibido != null) {
@@ -55,21 +61,26 @@ export class DetallePage implements OnInit {
       this.id = "";
     }
 
-    // Se hace la consulta a la base de datos para obtener los datos asociados a esa id
-    this.firestoreService.consultarPorId("tareas", this.id).subscribe((resultado:any) => {
-    // Preguntar si se ha encontrado un document con ese ID
-    if(resultado.payload.data() != null) {
-      this.document.id = resultado.payload.id
-      this.document.data = resultado.payload.data();
-      // Como ejemplo, mostrar el título de la tarea en consola
-      console.log(this.document.data.titulo);
+    if (this.id === 'nuevo') {
+      // Caso de inserción
+      this.tareaEditando = {} as ProyectoBiblioteca;
+      this.isNew = true;
     } else {
-      // No se ha encontrado un document on ese ID. Vacias los datos que hubiera
-      this.document.data = {} as ProyectoBiblioteca;
+      // Caso de modificación
+      this.isNew = false;
+      this.firestoreService.consultarPorId("libros-samuel", this.id).subscribe((resultado:any) => {
+        if(resultado.payload.data() != null) {
+          this.document.id = resultado.payload.id;
+          this.document.data = resultado.payload.data();
+          this.tareaEditando = this.document.data; // Cargar los datos del libro seleccionado
+        } else {
+          this.document.data = {} as ProyectoBiblioteca;
+        }
+      });
     }
-  })
-
   }
+
+  isNew: boolean = false;
 
   document: any = {
     id:"",
@@ -79,24 +90,138 @@ export class DetallePage implements OnInit {
   idLibroSelec: string = '';
 
   clickBotonBorrar() {
-    this.firestoreService.borrar('tareas', this.idLibroSelec).then(() => {
-      // Actualizar la lista completa
-      this.obtenerListaTareas();
-      // Limpiar el libro que se estaba editando
-      this.tareaEditando = {} as ProyectoBiblioteca;
+    this.firestoreService.borrar('libros-samuel', this.id).then(() => {
+      // Navegar de vuelta a la página principal
+      this.router.navigate(['/home']);
     });
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      header: 'Confirmar',
+      message: '¿Estás seguro de que deseas borrar este elemento?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel');
+          }
+        }, {
+          text: 'Borrar',
+          handler: () => {
+            this.clickBotonBorrar();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  clicBotonGuardar() {
+    if (this.isNew) {
+      this.firestoreService.insertar('libros-samuel', this.tareaEditando).then(() => {
+        console.log('Tarea creada correctamente!');
+        // Limpiar el libro que se estaba editando
+        this.tareaEditando = {} as ProyectoBiblioteca;
+        // Navegar de vuelta a la página principal
+        this.router.navigate(['/home']);
+      }).catch((error: any) => {
+        console.error('Error al crear la tarea: ', error);
+      });
+    } else {
+      this.clicBotonModificar();
+    }
   }
 
   clicBotonModificar() {
     this.firestoreService
-      .actualizar('tareas', this.idLibroSelec, this.tareaEditando)
+      .actualizar('libros-samuel', this.id, this.tareaEditando)
       .then(() => {
-        // Actualizar la lista completa
-        this.obtenerListaTareas();
-        // Limpiar el libro que se estaba editando
-        this.tareaEditando = {} as ProyectoBiblioteca;
+        // Navegar de vuelta a la página principal
+        this.router.navigate(['/home']);
       });
   }
 
-  
+  imagenSelec: string = "";
+
+  async seleccionar() {
+    // Comprobar si la aplicación tiene permisos de lectura
+    this.imagePicker.hasReadPermission().then(
+      (result) => {
+        // Si no tiene permiso de lecura se solicita al usuario
+        if (result == false) {
+          this.imagePicker.requestReadPermission();
+        }
+        else {
+          // Abrir selector de imágenes
+          this.imagePicker.getPictures({
+            maximumImagesCount: 1, // Permitir solo 1 imagen
+            outputType: 1 // 1 = Base64
+          }).then(
+            (results) => { // En la variable results se tienen las imágenes seleccionadas por el usuario
+              if (results.length > 0) {
+                // EN LA VARIABLE imagenSelec QUEDA ALMACENADA LA IMAGEN SELECCIONADA
+                this.imagenSelec = 'data:image/jpeg;base64,' + results[0];
+                console.log("Imagen que se ha seleccionado (en Base64): " + this.imagenSelec);
+              }
+            },
+            (err) => {
+              console.log(err);
+            }
+          );
+        }
+      }, (err) => {
+        console.log(err);
+      });
+  }
+
+  async subirImagen() {
+    // Mensaje de espera mientras se sube la imagen
+    const loading = await this.loadingController.create({
+      message: 'Subiendo imagen...',
+    });
+    // Mensaje de finalización de subida de la imagen
+    const toast = await this.toastController.create({
+      message: 'Imagen subida',
+      duration: 3000
+    });
+
+    // Carpeta del Storage donde se almacenará la imagen
+    let nombreCarpeta = "imagenes";
+
+    // Mostrar el mensaje de espera
+    loading.present();
+    // Asignar el nombre de la imagen en función de la hora actual para evitar duplicidades
+    let nombreImagen = `${new Date().getTime()}`;
+    // Llamar al método que sube la imagen al Storage
+    this.firestoreService.subirImagenBase64(nombreCarpeta, nombreImagen, this.imagenSelec)
+    .then(snapshot => {
+      snapshot.ref.getDownloadURL()
+      .then(downloadURL => {
+        // EN LA VARIABLE downloadURL SE OBTIENE LA DIRECCIÓN URL DE LA IMAGEN
+        console.log("downloadURL: ", downloadURL);
+        // Mostrar el mensaje de finalización de la subida
+        toast.present();
+        // Ocultar el mensaje de espera
+        loading.dismiss();
+    });
+    })
+  }
+
+  async eliminarArchivo(fileURL:string) {
+    const toast = await this.toastController.create({
+      message: 'Archivo eliminado',
+      duration: 3000
+    });
+    this.firestoreService.eliminarArchivo(fileURL)
+    .then(() => {
+      toast.present();
+    }, (error) => {
+      console.error(error);
+    });
+  }
+
 }

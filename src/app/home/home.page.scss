@@ -25,3 +25,37 @@
 #container a {
   text-decoration: none;
 }
+
+.header-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.content-background {
+  background-color: #f0f0f5;
+}
+
+.title {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 2em;
+  color: #666666; /* Cambiado a un color más claro */
+}
+
+.list-item {
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.book-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #666666; /* Cambiado a un color más claro */
+}
+
+.book-author, .book-editorial {
+  font-size: 1em;
+  color: #888888; /* Cambiado a un color más claro */
+}

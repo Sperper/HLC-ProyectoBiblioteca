@@ -1,31 +1,41 @@
 import { Injectable } from '@angular/core';
-
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { ProyectoBiblioteca } from './proyecto-biblioteca';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirestoreService {
 
-  constructor(private angularFirestore: AngularFirestore) { }
+  constructor(private firestore: AngularFirestore, private angularFireStorage: AngularFireStorage) { }
 
-  public insertar(coleccion: any, datos: any) {
-    return this.angularFirestore.collection(coleccion).add(datos);
+  insertar(coleccion: string, datos: ProyectoBiblioteca) {
+    return this.firestore.collection(coleccion).add(datos);
   }
 
-  public consultar(coleccion: any) {
-    return this.angularFirestore.collection(coleccion).snapshotChanges();
+  consultar(coleccion: string) {
+    return this.firestore.collection(coleccion).snapshotChanges();
   }
 
-  public borrar(coleccion : any, documentId: any) {
-    return this.angularFirestore.collection(coleccion).doc(documentId).delete();
+  consultarPorId(coleccion: string, id: string) {
+    return this.firestore.collection(coleccion).doc(id).snapshotChanges();
   }
 
-  public actualizar(coleccion: any, documentId: any, datos: any) {
-    return this.angularFirestore.collection(coleccion).doc(documentId).set(datos);
+  actualizar(coleccion: string, id: string, datos: ProyectoBiblioteca) {
+    return this.firestore.collection(coleccion).doc(id).set(datos);
   }
 
-  public consultarPorId(coleccion:string, documentId:string) {
-    return this.angularFirestore.collection(coleccion).doc(documentId).snapshotChanges();
+  borrar(coleccion: string, id: string) {
+    return this.firestore.collection(coleccion).doc(id).delete();
+  }
+
+  subirImagenBase64(nombreCarpeta:string, nombreArchivo:string, imagenBase64:string) {
+    let storageRef = this.angularFireStorage.ref(nombreCarpeta).child(nombreArchivo);
+    return storageRef.putString(imagenBase64, 'data_url');
+  }
+
+  eliminarArchivo(url:string) {
+    return this.angularFireStorage.storage.refFromURL(url).delete();
   }
 }
